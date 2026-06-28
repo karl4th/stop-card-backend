@@ -13,4 +13,6 @@ cd "$ROOT_DIR"
 compose build api
 compose run --rm api alembic upgrade head
 compose up -d --remove-orphans api nginx
+compose exec -T nginx nginx -t
+compose exec -T nginx nginx -s reload
 compose ps
