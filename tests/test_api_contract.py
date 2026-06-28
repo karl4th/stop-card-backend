@@ -56,3 +56,16 @@ def test_untrusted_host_is_rejected() -> None:
     response = client.get("/health/live", headers={"host": "attacker.example"})
 
     assert response.status_code == 400
+
+
+def test_configured_frontend_origin_is_allowed() -> None:
+    response = client.options(
+        "/api/stopcards",
+        headers={
+            "origin": "https://stop-card-app.vercel.app",
+            "access-control-request-method": "POST",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == ("https://stop-card-app.vercel.app")

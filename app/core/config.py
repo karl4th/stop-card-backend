@@ -42,7 +42,10 @@ class Settings(BaseSettings):
     jwt_algorithm: Literal["HS256", "HS384", "HS512"] = "HS256"
     jwt_access_token_minutes: int = Field(default=60, ge=5)
 
-    cors_origins: list[str] = ["https://stop-card.kz"]
+    cors_origins: list[str] = [
+        "https://stop-card.kz",
+        "https://stop-card-app.vercel.app",
+    ]
     trusted_hosts: list[str] = ["localhost", "127.0.0.1", "testserver"]
 
     @model_validator(mode="after")

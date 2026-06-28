@@ -55,7 +55,7 @@ umask 077
     printf 'PHOTO_URL_EXPIRES_SECONDS=3600\n'
     printf 'JWT_SECRET=%s\n' "$JWT_SECRET"
     printf 'JWT_ACCESS_TOKEN_MINUTES=60\n'
-    printf 'CORS_ORIGINS=["https://stop-card.kz","https://www.stop-card.kz"]\n'
+    printf 'CORS_ORIGINS=["https://stop-card.kz","https://www.stop-card.kz","https://stop-card-app.vercel.app"]\n'
     printf 'TRUSTED_HOSTS=["api.stop-card.kz","api","127.0.0.1","localhost"]\n'
     printf 'DOMAIN=api.stop-card.kz\n'
     printf 'LETSENCRYPT_EMAIL=%s\n' "$LETSENCRYPT_EMAIL"
