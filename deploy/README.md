@@ -7,35 +7,26 @@ Only TCP ports `22`, `80`, and `443` should be open in the VPS firewall.
 
 1. Install Docker Engine with the Compose plugin from Docker's official repository.
 2. Point `api.stop-card.kz` to the VPS public IP and wait until DNS resolves.
-3. Give the VPS read-only access to the GitHub repository using a repository
-   deploy key, then clone it to `/opt/stopcard`:
+3. Clone the public GitHub repository to `/opt/stopcard`:
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/stopcard_github -C stopcard-vps
-# Add ~/.ssh/stopcard_github.pub in GitHub: Settings -> Deploy keys (read-only).
-git config --global core.sshCommand "ssh -i ~/.ssh/stopcard_github -o IdentitiesOnly=yes"
-git clone git@github.com:karl4th/stop-card-backend.git /opt/stopcard
+git clone https://github.com/karl4th/stop-card-backend.git /opt/stopcard
 ```
 
-   Never give this deploy key write access.
+   If the repository becomes private, use a repository deploy key with read-only
+   access. Never store a personal GitHub token on the VPS.
 
-4. Create production configuration:
+4. Generate production configuration interactively:
 
 ```bash
 cd /opt/stopcard
-cp .env.production.example .env.production
-chmod 600 .env.production
+chmod +x deploy/scripts/*.sh
+./deploy/scripts/generate-production-env.sh
 ```
 
-Replace every placeholder. Generate secrets, for example:
-
-```bash
-openssl rand -hex 32
-```
-
-`POSTGRES_PASSWORD` must also be inserted into `DATABASE_URL` with URL encoding
-when it contains reserved URL characters. Do not expose ports `5432`, `9000`,
-or `9001` from the VPS.
+The script prompts for the Let's Encrypt email and Telegram bot token, generates
+independent PostgreSQL, MinIO, and JWT secrets, and writes `.env.production` with
+mode `0600`. Do not expose ports `5432`, `9000`, or `9001` from the VPS.
 
 Configure the firewall before enabling it, adapting the SSH rule if the server
 uses a non-standard SSH port:
