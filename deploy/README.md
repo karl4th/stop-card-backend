@@ -129,6 +129,13 @@ curl -i https://api.stop-card.kz/health/ready
 curl -i https://api.stop-card.kz/api/reference/reason
 ```
 
+Rotate the administrator password interactively:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.prod.yml run --rm api \
+  stopcard set-admin-password admin
+```
+
 For every photo, the API returns a signed URL on `api.stop-card.kz`. Nginx accepts
 only `GET`/`HEAD` under `/${MINIO_BUCKET}/stopcards/` and proxies the request to
 private MinIO while preserving the signed host and query parameters. Both the
