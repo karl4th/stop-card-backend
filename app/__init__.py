@@ -1,0 +1,1 @@
+"""Stopcard backend application."""

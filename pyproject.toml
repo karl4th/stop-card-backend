@@ -1,0 +1,49 @@
+[project]
+name = "stopcard-backend"
+version = "0.1.0"
+description = "Production-ready API for the Stopcard safety reporting service"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14",
+    "asyncpg>=0.30",
+    "fastapi>=0.115",
+    "minio>=7.2",
+    "pwdlib[argon2]>=0.2",
+    "pydantic-settings>=2.7",
+    "pyjwt>=2.10",
+    "python-multipart>=0.0.20",
+    "python-ulid>=3.0",
+    "sqlalchemy[asyncio]>=2.0",
+    "uvicorn[standard]>=0.34",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=0.1",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.9",
+]
+
+[project.scripts]
+stopcard = "app.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
