@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     app_name: str = "Stopcard API"
     environment: Literal["development", "test", "production"] = "development"
     debug: bool = False
+    docs_enabled: bool = True
     api_prefix: str = "/api"
 
     database_url: str = "postgresql+asyncpg://stopcard:stopcard@localhost:5432/stopcard"

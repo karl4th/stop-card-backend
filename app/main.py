@@ -25,8 +25,9 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.debug,
     lifespan=lifespan,
-    docs_url="/docs" if settings.environment != "production" else None,
-    redoc_url="/redoc" if settings.environment != "production" else None,
+    docs_url="/docs" if settings.docs_enabled else None,
+    redoc_url="/redoc" if settings.docs_enabled else None,
+    openapi_url="/openapi.json" if settings.docs_enabled else None,
 )
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +39,14 @@ app.add_middleware(
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts)
 app.include_router(health_router)
 app.include_router(api_router, prefix=settings.api_prefix)
+
+
+@app.get("/", include_in_schema=False)
+async def root() -> dict[str, str]:
+    response = {"name": settings.app_name, "version": app.version, "status": "ok"}
+    if settings.docs_enabled:
+        response["docs"] = "/docs"
+    return response
 
 
 @app.exception_handler(FieldValidationError)

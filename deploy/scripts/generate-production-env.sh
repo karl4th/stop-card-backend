@@ -35,6 +35,7 @@ umask 077
 {
     printf 'ENVIRONMENT=production\n'
     printf 'DEBUG=false\n'
+    printf 'DOCS_ENABLED=true\n'
     printf 'POSTGRES_DB=stopcard\n'
     printf 'POSTGRES_USER=stopcard\n'
     printf 'POSTGRES_PASSWORD=%s\n' "$POSTGRES_PASSWORD"

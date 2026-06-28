@@ -35,6 +35,23 @@ def test_liveness() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_root_describes_api_and_links_docs() -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "name": "Stopcard API",
+        "version": "0.1.0",
+        "status": "ok",
+        "docs": "/docs",
+    }
+
+
+def test_swagger_and_openapi_are_available() -> None:
+    assert client.get("/docs").status_code == 200
+    assert client.get("/openapi.json").status_code == 200
+
+
 def test_untrusted_host_is_rejected() -> None:
     response = client.get("/health/live", headers={"host": "attacker.example"})
 
