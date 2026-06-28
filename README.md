@@ -1,5 +1,7 @@
 # Stopcard Backend
 
+[![CI](https://github.com/karl4th/stop-card-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/karl4th/stop-card-backend/actions/workflows/ci.yml)
+
 Backend сервиса производственной безопасности **StopКарта** для `stop-card.kz`.
 Приложение принимает сообщения о небезопасной работе, проверяет Telegram Mini App
 авторизацию, хранит фотографии в MinIO и предоставляет администраторам управление

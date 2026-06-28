@@ -7,7 +7,18 @@ Only TCP ports `22`, `80`, and `443` should be open in the VPS firewall.
 
 1. Install Docker Engine with the Compose plugin from Docker's official repository.
 2. Point `api.stop-card.kz` to the VPS public IP and wait until DNS resolves.
-3. Clone the repository to `/opt/stopcard`.
+3. Give the VPS read-only access to the GitHub repository using a repository
+   deploy key, then clone it to `/opt/stopcard`:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/stopcard_github -C stopcard-vps
+# Add ~/.ssh/stopcard_github.pub in GitHub: Settings -> Deploy keys (read-only).
+git config --global core.sshCommand "ssh -i ~/.ssh/stopcard_github -o IdentitiesOnly=yes"
+git clone git@github.com:karl4th/stop-card-backend.git /opt/stopcard
+```
+
+   Never give this deploy key write access.
+
 4. Create production configuration:
 
 ```bash
@@ -59,11 +70,32 @@ Do not use the staging certificate for the real site.
 
 ## Updates
 
-After pulling reviewed changes:
+Manual update from the VPS:
 
 ```bash
+git switch main
+git pull --ff-only
 ./deploy/scripts/deploy-update.sh
 ```
+
+For normal deployments use `.github/workflows/deploy.yml`. It connects to the
+VPS and deploys an exact 40-character commit SHA, not a mutable branch name.
+Configure the GitHub `production` environment with these secrets:
+
+- `VPS_HOST` — VPS address;
+- `VPS_USER` — unprivileged deployment user with access to Docker;
+- `VPS_PORT` — SSH port, normally `22`;
+- `VPS_SSH_PRIVATE_KEY` — private key used only by GitHub Actions to enter VPS;
+- `VPS_KNOWN_HOSTS` — pinned output of `ssh-keyscan -H <VPS_HOST>` verified
+  against the VPS host key.
+
+The corresponding public key belongs in the VPS user's `authorized_keys`.
+Enable automatic deployments from `main` only after the first successful manual
+run by setting the repository variable `PRODUCTION_DEPLOY_ENABLED=true`. Automatic
+deployment starts only after the `CI` workflow finishes successfully.
+Protect `main`, require the CI workflow, and require pull-request review before
+merge. A previous commit can be deployed from `workflow_dispatch` for application
+rollback; database migrations must still be designed as forward-compatible.
 
 The migration runs before the new API container replaces the existing one.
 Database migrations therefore need to remain backward-compatible during a

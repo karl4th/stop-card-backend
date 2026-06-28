@@ -1,0 +1,65 @@
+name: Deploy production
+
+on:
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact commit SHA to deploy (empty means current commit)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stopcard-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      vars.PRODUCTION_DEPLOY_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      TARGET_SHA: ${{ inputs.commit_sha || github.event.workflow_run.head_sha || github.sha }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+      SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+    steps:
+      - name: Validate deployment inputs
+        run: |
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$VPS_PORT" =~ ^[0-9]+$ ]]
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+
+      - name: Configure SSH
+        run: |
+          install -d -m 700 ~/.ssh
+          install -m 600 /dev/null ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          install -m 600 /dev/null ~/.ssh/known_hosts
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy exact revision
+        run: |
+          ssh -p "$VPS_PORT" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "/opt/stopcard/deploy/scripts/checkout-and-deploy.sh '$TARGET_SHA'"
+
+      - name: Verify public health
+        run: curl --fail --show-error --silent --retry 5 --retry-delay 3 https://api.stop-card.kz/health/ready
