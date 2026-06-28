@@ -40,6 +40,17 @@ ufw allow 443/tcp
 ufw enable
 ```
 
+After confirming that the `deploy` user can enter using an SSH key, harden SSH
+and the firewall as root:
+
+```bash
+./deploy/scripts/harden-host.sh
+```
+
+The script refuses to disable password login unless
+`/home/deploy/.ssh/authorized_keys` exists and is non-empty. Root remains
+available only by key for emergency administration.
+
 ## First deployment
 
 ```bash
