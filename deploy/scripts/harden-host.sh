@@ -15,8 +15,9 @@ if [[ ! -s "$DEPLOY_KEYS" ]]; then
 fi
 
 install -m 0644 \
-    "$ROOT_DIR/deploy/ssh/99-stopcard-hardening.conf" \
-    /etc/ssh/sshd_config.d/99-stopcard-hardening.conf
+    "$ROOT_DIR/deploy/ssh/00-stopcard-hardening.conf" \
+    /etc/ssh/sshd_config.d/00-stopcard-hardening.conf
+rm -f /etc/ssh/sshd_config.d/99-stopcard-hardening.conf
 
 sshd -t
 systemctl reload ssh
